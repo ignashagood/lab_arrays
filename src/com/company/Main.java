@@ -153,8 +153,8 @@ public class Main {
 
     private static boolean affiliationNumberToSet(int number, int[] set) {
         int counter = 0;
-        for(int i = 0; i < set.length; i++) {
-            if (number == set[i])
+        for (int j : set) {
+            if (number == j)
                 counter++;
         }
         return counter != 0;
