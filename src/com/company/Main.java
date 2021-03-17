@@ -29,24 +29,45 @@ public class Main {
 
         String line = scanner.nextLine();
         int[] setA = convertStringToArray(sizeSetA, line);
+        if(setA.length == 0) {
+            System.out.println("Множество A пусто.");
+            return;
+        }
 
-        System.out.print("Первый массив: ");
+        System.out.print("Первое множество: ");
         for (int j : setA) System.out.print(j + " ");
-
+        System.out.println();
         try {
             sizeSetB = Integer.parseInt(scanner.nextLine());
         } catch (NumberFormatException exception) {
             System.out.println("Третья строка в файле не содержит число. Программа завершает работу с ошибкой.");
             return;
         }
+
         line = scanner.nextLine();
         int[] setB = convertStringToArray(sizeSetB, line);
-        System.out.print("Второй массив: ");
+        if(setB.length == 0) {
+            System.out.println("Множество B пусто.");
+            return;
+        }
+        System.out.print("Второе множество: ");
         for (int j : setB) System.out.print(j + " ");
+        System.out.println();
         int[] setOfIntersections = intersectionSets(setA, setB);
+        System.out.print("Множество пересечений: ");
         for (int j : setOfIntersections) System.out.print(j + " ");
+        System.out.println();
         int[] combiningSets = unificationSets(setA, setB);
+        System.out.print("Множество объединений: ");
         for (int j : combiningSets) System.out.print(j + " ");
+        System.out.println();
+        int[] differenceSets = subtractionSets(setA, setB);
+        System.out.print("Множество разности: ");
+        for (int j : differenceSets) System.out.print(j + " ");
+        System.out.println();
+        if(affiliationNumberToSet(9, setA)) System.out.println("Число принадлежит множеству");
+        else System.out.println("Число не принадлежит множеству");
+
     }
 
     private static int[] convertStringToArray(int length, String line) {
@@ -109,4 +130,34 @@ public class Main {
         System.arraycopy(supportArray, 0, finalArray, 0, counter);
         return finalArray;
     }
+
+    private static int[] subtractionSets(int[] setA, int[] setB) {
+        int[] subtractionSet = new int[setA.length];
+        int counter = 0, i = 0, j = 0, k = 0;
+        for(i = 0; i < setA.length; i++) {
+            for (j = 0; j < setB.length; j++) {
+                if (setA[i] != setB[j]) {
+                    counter++;
+                }
+            }
+            if(counter == setB.length) {
+                subtractionSet[k] = setA[i];
+                k++;
+            }
+            counter = 0;
+        }
+        int[] finalArray = new int[k];
+        System.arraycopy(subtractionSet, 0, finalArray, 0, k);
+        return finalArray;
+    }
+
+    private static boolean affiliationNumberToSet(int number, int[] set) {
+        int counter = 0;
+        for(int i = 0; i < set.length; i++) {
+            if (number == set[i])
+                counter++;
+        }
+        return counter != 0;
+    }
+
 }
