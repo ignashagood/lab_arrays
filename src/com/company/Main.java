@@ -2,9 +2,6 @@ package com.company;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Scanner;
 
 public class Main {
@@ -18,6 +15,7 @@ public class Main {
         }
         Scanner scanner = new Scanner(file);
         int sizeSetA, sizeSetB;
+
 
         try {
             sizeSetA = Integer.parseInt(scanner.nextLine());
@@ -67,7 +65,15 @@ public class Main {
         System.out.println();
         if(affiliationNumberToSet(9, setA)) System.out.println("Число принадлежит множеству");
         else System.out.println("Число не принадлежит множеству");
-
+        if(subset(setA, setB)) System.out.println("Множество является подмножеством другого");
+        else System.out.println("Множество не является подмножеством другого");
+        int[] universe = definitionUniversalSet(setA, setB);
+        System.out.print("Универсум: ");
+        for (int j : universe) System.out.print(j + " ");
+        System.out.println();
+        int[] negationSet = defineNegationOfSet(setA, universe);
+        System.out.print("Отрицание множества: ");
+        for (int j : negationSet) System.out.print(j + " ");
     }
 
     private static int[] convertStringToArray(int length, String line) {
@@ -160,4 +166,63 @@ public class Main {
         return counter != 0;
     }
 
+    private static boolean subset(int[] firstSet, int[] secondSet) {
+        int numbersCounter = 0, coincidencesCounter = 0;
+        for (int j : firstSet) {
+            for (int k : secondSet) {
+                if(j == k) coincidencesCounter++;
+            }
+            if(coincidencesCounter != 0) numbersCounter++;
+            coincidencesCounter = 0;
+        }
+        return numbersCounter == firstSet.length;
+    }
+
+    private static int[] definitionUniversalSet(int[] firstSet, int[] secondSet) {
+        int[] universalSet = new int[firstSet.length + secondSet.length];
+        System.arraycopy(firstSet, 0, universalSet, 0, firstSet.length);
+        System.arraycopy(secondSet, 0, universalSet, firstSet.length, secondSet.length);
+        for (int j = 0; j<universalSet.length; j++) {
+            for (int k = 0; k < universalSet.length; k++){
+                if (universalSet[j] < universalSet[k]) {
+                    int buffer = universalSet[j];
+                    universalSet[j] = universalSet[k];
+                    universalSet[k] = buffer;
+                }
+            }
+        }
+        return universalSet;
+    }
+
+    private static int[] defineNegationOfSet(int[] set, int[] universe) {
+        int counter = 0, i = 0, count = 0, p = 0;
+        int[] negationSet = new int[universe.length - set.length];
+        for(int j = 0; j < universe.length; j++) {
+            for(int k = 0; k < set.length; k++) {
+                if (universe[j] == set[k]) {
+                    counter++;
+                }
+            }
+            if(counter == 0) {
+                negationSet[p] = universe[j];
+                p++;
+            }
+            counter = 0;
+        }
+        for(int j = 0; j < set.length; j++) {
+            for (int k = 0; k < universe.length; k++) {
+                if (set[j] == universe[k]) {
+                    counter++;
+                }
+            }
+            for(i = 0; i < negationSet.length; i++)
+                if(set[j] == negationSet[i]) count++;
+            if(counter >= 2 && count == 0) {
+                negationSet[p] = set[j];
+                p++;
+            }
+            counter = 0;
+        }
+        return negationSet;
+    }
 }
