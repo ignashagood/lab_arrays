@@ -2,13 +2,14 @@ package com.company;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
+    private static final String NEGATIVE_SIZE_ERROR = "Считан отрицательный размер множества. Программа завершает работу с ошибкой.";
 
     public static void main(String[] args) throws FileNotFoundException {
-        String path = "C:\\Users\\ignat\\Desktop\\arrays.txt";
-        File file = new File(path);
+        File file = new File(args[0]);
         if (!file.exists()) {
             System.out.println("Файл не найден. Программа завершает работу с ошибкой.");
             return;
@@ -16,64 +17,71 @@ public class Main {
         Scanner scanner = new Scanner(file);
         int sizeSetA, sizeSetB;
 
-
-        try {
-            sizeSetA = Integer.parseInt(scanner.nextLine());
-        } catch (NumberFormatException exception) {
-
-            System.out.println("Первая строка в файле не содержит число. Программа завершает работу с ошибкой.");
-            return;
-        }
+        sizeSetA = extractSize(scanner.nextLine(), "A");
+        if(sizeSetA == -1) return;
 
         String line = scanner.nextLine();
         int[] setA = convertStringToArray(sizeSetA, line);
-        if(setA.length == 0) {
-            System.out.println("Множество A пусто.");
+        if (setA.length == 0) {
+            System.out.println("Множество A пусто");
             return;
         }
 
-        System.out.print("Первое множество: ");
-        for (int j : setA) System.out.print(j + " ");
-        System.out.println();
-        try {
-            sizeSetB = Integer.parseInt(scanner.nextLine());
-        } catch (NumberFormatException exception) {
-            System.out.println("Третья строка в файле не содержит число. Программа завершает работу с ошибкой.");
-            return;
-        }
+        sizeSetB = extractSize(scanner.nextLine(), "B");
+        if(sizeSetB == -1) return;
 
         line = scanner.nextLine();
         int[] setB = convertStringToArray(sizeSetB, line);
-        if(setB.length == 0) {
-            System.out.println("Множество B пусто.");
+        if (setB.length == 0) {
+            System.out.println("Множество B пусто");
             return;
         }
-        System.out.print("Второе множество: ");
-        for (int j : setB) System.out.print(j + " ");
-        System.out.println();
-        int[] setOfIntersections = intersectionSets(setA, setB);
-        System.out.print("Множество пересечений: ");
-        for (int j : setOfIntersections) System.out.print(j + " ");
-        System.out.println();
-        int[] combiningSets = unificationSets(setA, setB);
-        System.out.print("Множество объединений: ");
-        for (int j : combiningSets) System.out.print(j + " ");
-        System.out.println();
-        int[] differenceSets = subtractionSets(setA, setB);
-        System.out.print("Множество разности: ");
-        for (int j : differenceSets) System.out.print(j + " ");
-        System.out.println();
-        if(affiliationNumberToSet(9, setA)) System.out.println("Число принадлежит множеству");
-        else System.out.println("Число не принадлежит множеству");
-        if(subset(setA, setB)) System.out.println("Множество является подмножеством другого");
-        else System.out.println("Множество не является подмножеством другого");
-        int[] universe = definitionUniversalSet(setA, setB);
-        System.out.print("Универсум: ");
-        for (int j : universe) System.out.print(j + " ");
-        System.out.println();
-        int[] negationSet = defineNegationOfSet(setA, universe);
-        System.out.print("Отрицание множества: ");
-        for (int j : negationSet) System.out.print(j + " ");
+
+        System.out.println("Первое множество: " + Arrays.toString(setA));
+        System.out.println("Второе множество: " + Arrays.toString(setB));
+        System.out.println("Множество пересечений: " + Arrays.toString(intersectionSets(setA, setB)));
+        System.out.println("Множество объединений: " + Arrays.toString(unificationSets(setA, setB)));
+        System.out.println("Множество разности: " + Arrays.toString(subtractionSets(setA, setB)));
+
+        if (affiliationNumberToSet(Integer.parseInt(args[1]), setA)) {
+            System.out.println("Число " + args[1] + " принадлежит множеству");
+        } else {
+            System.out.println("Число " + args[1] + " не принадлежит множеству");
+        }
+
+        if (subset(setA, setB)) {
+            System.out.println("Множество является подмножеством другого");
+        } else {
+            System.out.println("Множество не является подмножеством другого");
+        }
+
+        int[] universe = defineUniversalSet(setA, setB);
+        System.out.println("Универсум: " + Arrays.toString(universe));
+        System.out.println("Отрицание множества: " + Arrays.toString(defineNegationOfSet(setA, universe)));
+    }
+
+    /**
+     * Извлекает из строки размер множества
+     *
+     * @param line Исходная строка
+     * @return Размер множества, если >= 0, иначе -1
+     */
+    public static int extractSize(String line, String setName) {
+        try {
+            int size = Integer.parseInt(line);
+            if (size < 0) {
+                System.out.println(NEGATIVE_SIZE_ERROR);
+                return -1;
+            }
+            if(size == 0) {
+                System.out.println("Множество " + setName + " пусто");
+                return -1;
+            }
+            return size;
+        } catch (NumberFormatException exception) {
+            System.out.println("Первая строка в файле не содержит число. Программа завершает работу с ошибкой.");
+            return -1;
+        }
     }
 
     private static int[] convertStringToArray(int length, String line) {
@@ -100,32 +108,30 @@ public class Main {
     private static int[] intersectionSets(int[] setA, int[] setB) {
         int k = 0, counter = 0;
         int[] supportArray = new int[Math.max(setA.length, setB.length)];
-        for (int j : setA) {
-            for (int value : setB) {
-                if (j == value) {
+        for (int i : setA) {
+            for (int j : setB) {
+                if (i == j) {
                     counter++;
-                    supportArray[k++] = value;
+                    supportArray[k++] = j;
                 }
             }
         }
         int[] finalArray = new int[counter];
         System.arraycopy(supportArray, 0, finalArray, 0, counter);
-        if(counter == 0) {
+        if (counter == 0) {
             System.out.println("Пересечение множеств A и B пусто.");
-            return finalArray;
         }
-        else return finalArray;
+        return finalArray;
     }
 
     private static int[] unificationSets(int[] setA, int[] setB) {
         int k = 0, counter = 0, sumOfLengths = setA.length + setB.length;
-        int[] supportArray = new int[setA.length + setB.length];
-        int[] mergedArray = new int[setA.length + setB.length];
+        int[] supportArray = new int[sumOfLengths];
+        int[] mergedArray = new int[sumOfLengths];
         System.arraycopy(setA, 0, mergedArray, 0, setA.length);
         System.arraycopy(setB, 0, mergedArray, setA.length, setB.length);
         outer:
-        for (int j = 0; j < sumOfLengths; j++) {
-            if (counter == sumOfLengths) break;
+        for (int j = 0; j < mergedArray.length; j++) {
             int checker = mergedArray[k++];
             for (int i = 0; i < counter; i++) {
                 if (supportArray[i] == checker) continue outer;
@@ -139,16 +145,15 @@ public class Main {
 
     private static int[] subtractionSets(int[] setA, int[] setB) {
         int[] subtractionSet = new int[setA.length];
-        int counter = 0, i = 0, j = 0, k = 0;
-        for(i = 0; i < setA.length; i++) {
-            for (j = 0; j < setB.length; j++) {
-                if (setA[i] != setB[j]) {
+        int counter = 0, k = 0;
+        for (int i : setA) {
+            for (int j : setB) {
+                if (i != j) {
                     counter++;
                 }
             }
-            if(counter == setB.length) {
-                subtractionSet[k] = setA[i];
-                k++;
+            if (counter == setB.length) {
+                subtractionSet[k++] = i;
             }
             counter = 0;
         }
@@ -167,27 +172,30 @@ public class Main {
     }
 
     private static boolean subset(int[] firstSet, int[] secondSet) {
-        int numbersCounter = 0, coincidencesCounter = 0;
-        for (int j : firstSet) {
-            for (int k : secondSet) {
-                if(j == k) coincidencesCounter++;
+        int coincidencesCounter = 0;
+        for (int i : firstSet) {
+            boolean coincidences = false;
+            for (int j : secondSet) {
+                if (i == j) {
+                    coincidences = true;
+                    break;
+                }
             }
-            if(coincidencesCounter != 0) numbersCounter++;
-            coincidencesCounter = 0;
+            if (coincidences) coincidencesCounter++;
         }
-        return numbersCounter == firstSet.length;
+        return coincidencesCounter == firstSet.length;
     }
 
-    private static int[] definitionUniversalSet(int[] firstSet, int[] secondSet) {
+    private static int[] defineUniversalSet(int[] firstSet, int[] secondSet) {
         int[] universalSet = new int[firstSet.length + secondSet.length];
         System.arraycopy(firstSet, 0, universalSet, 0, firstSet.length);
         System.arraycopy(secondSet, 0, universalSet, firstSet.length, secondSet.length);
-        for (int j = 0; j<universalSet.length; j++) {
-            for (int k = 0; k < universalSet.length; k++){
-                if (universalSet[j] < universalSet[k]) {
-                    int buffer = universalSet[j];
-                    universalSet[j] = universalSet[k];
-                    universalSet[k] = buffer;
+        for (int i = 0; i < universalSet.length; i++) {
+            for (int j = 0; j < universalSet.length; j++) {
+                if (universalSet[i] < universalSet[j]) {
+                    int buffer = universalSet[i];
+                    universalSet[i] = universalSet[j];
+                    universalSet[j] = buffer;
                 }
             }
         }
@@ -197,28 +205,28 @@ public class Main {
     private static int[] defineNegationOfSet(int[] set, int[] universe) {
         int counter = 0, i = 0, count = 0, p = 0;
         int[] negationSet = new int[universe.length - set.length];
-        for(int j = 0; j < universe.length; j++) {
-            for(int k = 0; k < set.length; k++) {
-                if (universe[j] == set[k]) {
+        for (int value : universe) {
+            for (int j : set) {
+                if (value == j) {
                     counter++;
                 }
             }
-            if(counter == 0) {
-                negationSet[p] = universe[j];
+            if (counter == 0) {
+                negationSet[p] = value;
                 p++;
             }
             counter = 0;
         }
-        for(int j = 0; j < set.length; j++) {
-            for (int k = 0; k < universe.length; k++) {
-                if (set[j] == universe[k]) {
+        for (int value : set) {
+            for (int j : universe) {
+                if (value == j) {
                     counter++;
                 }
             }
-            for(i = 0; i < negationSet.length; i++)
-                if(set[j] == negationSet[i]) count++;
-            if(counter >= 2 && count == 0) {
-                negationSet[p] = set[j];
+            for (i = 0; i < negationSet.length; i++)
+                if (value == negationSet[i]) count++;
+            if (counter >= 2 && count == 0) {
+                negationSet[p] = value;
                 p++;
             }
             counter = 0;
